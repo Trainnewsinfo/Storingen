@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrainNews Storingen</title>
+
+<style>
+body {
+    margin:0;
+    font-family: Arial;
+    background:#fdf6e3;
+    color:#111;
+}
+
+.container {
+    max-width:900px;
+    margin:auto;
+    padding:20px;
+}
+
+.card {
+    background:white;
+    padding:12px;
+    margin-bottom:10px;
+    border-radius:10px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.active { border-left:5px solid #c0392b; }
+.inactive { border-left:5px solid #7f8c8d; opacity:0.85; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1> TrainNews Storingen</h1>
+
+<div id="status">laden...</div>
+
+<div id="active"></div>
+<div id="inactive"></div>
+
+</div>
+
+<script>
+
+const API = "https://api.allorigins.win/raw?url=" +
+encodeURIComponent("https://treinbestuurder.be/site/v4/storingen/");
+
+async function load(){
+
+try {
+const res = await fetch(API);
+const data = await res.json();
+
+let active = "";
+let inactive = "";
+
+// ACTIEF
+if(data.actieve_storingen?.length){
+data.actieve_storingen.forEach(s=>{
+active += `<div class="card active"><b>${s.titel}</b><br>${s.omschrijving||""}</div>`;
+});
+document.getElementById("status").innerText=" Actieve storingen";
+}else{
+active = `<div class="card">Geen actieve storingen</div>`;
+document.getElementById("status").innerText=" Alles normaal";
+}
+
+// INACTIEF
+if(data.inactieve_storingen?.length){
+data.inactieve_storingen.forEach(s=>{
+inactive += `<div class="card inactive"><b>${s.titel}</b><br>${s.omschrijving||""}</div>`;
+});
+}
+
+document.getElementById("active").innerHTML="<h2>Actief</h2>"+active;
+document.getElementById("inactive").innerHTML="<h2>Afgelopen</h2>"+inactive;
+
+}catch(e){
+document.getElementById("status").innerText=" fout bij laden";
+}
+
+}
+
+load();
+setInterval(load,60000);
+
+</script>
+
+</body>
+</html>
